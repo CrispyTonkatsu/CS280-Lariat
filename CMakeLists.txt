@@ -14,3 +14,4 @@ add_compile_options(-Wall -Werror -Wextra -std=c++17 -pedantic -Wconversion -O2 
 
 # files to compile
 add_executable(driver_c ./src/driver.cpp)
+add_executable(driver_custom ./src/custom.cpp)

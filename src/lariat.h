@@ -108,10 +108,10 @@ public:
 
 private:
   struct LNode { // DO NOT modify provided code
-    LNode *next = nullptr;
-    LNode *prev = nullptr;
-    int count = 0; // number of items currently in the node
-    T values[Size];
+    LNode *next{nullptr};
+    LNode *prev{nullptr};
+    int count{0}; // number of items currently in the node
+    T values[Size]{};
   };
 
   // DO NOT modify provided code
@@ -253,7 +253,7 @@ void Lariat<T, Size>::compact() {}
 // Helper Functions
 
 template<typename T, int Size>
-typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(Lariat<T, Size>::LNode &to_split) {}
+typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {}
 
 template<typename T, int Size>
 typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index) const {}

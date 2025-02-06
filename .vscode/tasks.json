@@ -45,6 +45,22 @@
 			"dependsOn": [
 				"Build"
 			]
+		},
+		{
+			"label": "Run Custom Test",
+			"type": "shell",
+			"command": "./build/driver_custom",
+			"dependsOn": [
+				"Build"
+			]
+		},
+		{
+			"label": "Valgrind Test Run Test",
+			"type": "shell",
+			"command": "valgrind -q --leak-check=full --show-reachable=yes --tool=memcheck ./build/driver_custom",
+			"dependsOn": [
+				"Build"
+			]
 		}
 	],
 	"inputs": [

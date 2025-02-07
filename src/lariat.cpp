@@ -1,5 +1,6 @@
-#include <iomanip>
+#include <algorithm>
 #include <iostream>
+#include <utility>
 
 #define LARIAT_CPP
 
@@ -7,17 +8,16 @@
   #include "lariat.h"
 #endif
 
-// TODO: Move everything below here into `lariat.cpp` and document it.
+// TODO: Document the code.
 // TODO: Throw Exceptions for the required things.
 
 // Utility Implementation
 
-// TODO: Consider utilizing move here.
 template<typename T>
 void swap(T &a, T &b) {
-  T temp = a;
-  a = b;
-  b = temp;
+  T temp = std::move(a);
+  a = std::move(b);
+  b = std::move(temp);
 }
 
 // Constructors + Destructor
@@ -63,8 +63,8 @@ Lariat<T, Size>::~Lariat() {
 
 template<typename T, int Size>
 void Lariat<T, Size>::insert(int index, const T &value) {
-  if (index < 0 || index >= size_ + 1) {
-    throw LariatException(LariatException::E_BAD_INDEX, "Insert Error: Invalid index for insertion.");
+  if (index < 0 || index > size_) {
+    throw LariatException(LariatException::E_BAD_INDEX, "Subscript is out of range");
   }
 
   if (index == 0) {

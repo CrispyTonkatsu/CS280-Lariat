@@ -4,6 +4,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <cstring> // memcpy
+#include <iostream>
+#include <ostream>
 #include <string> // error strings
 #include <utility> // error strings
 
@@ -254,20 +256,21 @@ void Lariat<T, Size>::push_front(const T &value) {
 
   if (node->count < Size) {
     node->values[0] = value;
+    node->count++;
 
   } else {
     T overflow = node->values[0];
     node->values[0] = value;
 
     LNode *new_half = split(*node);
-    new_half->values[new_half->count - 1] = overflow;
+    new_half->values[new_half->count] = overflow;
+    new_half->count++;
 
     if (head_ == tail_) {
       tail_ = new_half;
     }
   }
 
-  node->count++;
   size_++;
 }
 
@@ -416,15 +419,19 @@ template<typename T, int Size>
 typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {
   LNode *second_half = create_node();
 
+  // NOTE: The count to try and balance for
   int expected_count = to_split.count + 1;
 
-  int split_point = (expected_count / 2) + (expected_count % 2);
+  // NOTE: Whether the split will be equal
+  int extra_whole = (expected_count % 2);
 
-  for (int i = 0; i < split_point - 1; i++) {
+  int split_point = (expected_count / 2) + extra_whole;
+
+  for (int i = 0; i < split_point - 1 - extra_whole; i++) {
     second_half->values[i] = to_split.values[split_point + i];
     second_half->count++;
   }
-  to_split.count = split_point - (expected_count % 2);
+  to_split.count = split_point;
 
   second_half->next = to_split.next;
   second_half->prev = &to_split;

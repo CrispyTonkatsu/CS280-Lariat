@@ -138,7 +138,7 @@ private:
 
   void shift_up(LNode *node, int index);
 
-  void shift_down(LNode *node);
+  void shift_down(LNode *node, int index);
 
   LNode *create_node() const;
 };

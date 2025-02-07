@@ -8,6 +8,8 @@
   #include "lariat.h"
 #endif
 
+// NOTE: Current Test = 9
+
 // TODO: Document the code.
 // TODO: Throw Exceptions for the required things.
 
@@ -164,18 +166,68 @@ void Lariat<T, Size>::push_back(const T &value) {
 // Deletion Methods
 
 template<typename T, int Size>
-void Lariat<T, Size>::erase(int) {
-  // TODO: Implement pop front
+void Lariat<T, Size>::erase(int index) {
+  if (index < 0 || index >= size_) {
+    throw LariatException(LariatException::E_BAD_INDEX, "Subscript is out of range");
+  }
+
+  if (index == 0) {
+    pop_front();
+    return;
+  }
+
+  if (index == size_ - 1) {
+    pop_back();
+    return;
+  }
+
+  ElementSearch search = find_element(index);
+  if (search.node == nullptr) {
+    // TODO: Throw an exception or sth
+  }
+
+  shift_down(search.node, search.index);
+  search.node->count--;
+  size_--;
+
+  // HACK: Left off here, implementing deletion of empty node
+
+  if (search.node->count == 0) {
+    search.node->prev->next = search.node->next;
+    search.node->next->prev = search.node->prev;
+
+    delete search.node;
+    nodecount_--;
+  }
 }
 
 template<typename T, int Size>
 void Lariat<T, Size>::pop_front() {
-  // TODO: Implement pop front
+  // TODO: Throw exception for empty Lariat
+  shift_down(head_, 0);
+  head_->count--;
+  size_--;
+
+  if (head_->count == 0) {
+    LNode *new_head = head_->next;
+    delete head_;
+    nodecount_--;
+    head_ = new_head;
+  }
 }
 
 template<typename T, int Size>
 void Lariat<T, Size>::pop_back() {
-  // TODO: Implement pop back
+  // TODO: Throw exception for empty Lariat
+  tail_->count--;
+  size_--;
+
+  if (tail_->count == 0) {
+    LNode *new_tail = tail_->prev;
+    delete tail_;
+    nodecount_--;
+    tail_ = new_tail;
+  }
 }
 
 // Access Methods
@@ -283,7 +335,7 @@ template<typename T, int Size>
 typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {
   LNode *second_half = create_node();
 
-  // NOTE: The count to try and balance for
+  // NOTE: The count to split for
   int expected_count = to_split.count + 1;
 
   // NOTE: Whether the split will be equal
@@ -311,7 +363,9 @@ typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {
 
 template<typename T, int Size>
 typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index) const {
-  // TODO: Add bound checking here
+  if (index < 0 || index >= size_) {
+    throw LariatException(LariatException::E_BAD_INDEX, "Subscript is out of range");
+  }
 
   int traversed_indexes = 0;
   for (LNode *current = head_; current != nullptr; current = current->next) {
@@ -326,7 +380,7 @@ typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index)
   return {nullptr, 0};
 }
 
-// HACK: The index provided will hold the overflow value
+// HACK: The index provided will hold the overflow value if there is one
 template<typename T, int Size>
 void Lariat<T, Size>::shift_up(Lariat<T, Size>::LNode *node, int index) {
   if (node == nullptr) {
@@ -339,12 +393,12 @@ void Lariat<T, Size>::shift_up(Lariat<T, Size>::LNode *node, int index) {
 }
 
 template<typename T, int Size>
-void Lariat<T, Size>::shift_down(Lariat<T, Size>::LNode *node) {
+void Lariat<T, Size>::shift_down(Lariat<T, Size>::LNode *node, int index) {
   if (node == nullptr) {
     return;
   }
 
-  for (int i = 0; i + 1 < Size; i++) {
+  for (int i = index; i + 1 < Size; i++) {
     swap(node->values[i], node->values[i + 1]);
   }
 }
@@ -354,9 +408,6 @@ typename Lariat<T, Size>::LNode *Lariat<T, Size>::create_node() const {
   LNode *output = nullptr;
   try {
     output = new LNode;
-    output->prev = nullptr;
-    output->next = nullptr;
-    output->count = 0;
 
   } catch (const std::bad_alloc &) {
     throw LariatException(LariatException::E_NO_MEMORY, "Unable to allocate a new node. Check if memory is leaking.");

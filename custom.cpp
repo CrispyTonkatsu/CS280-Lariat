@@ -20,13 +20,14 @@ int main() {
       'i',
   };
 
+  int index = 2;
   // Shift Up
-  for (int i = 0; i + 1 < 9; i++) {
-    swap(array[0], array[i + 1]);
+  for (int i = index; i + 1 < 9; i++) {
+    swap(array[index], array[i + 1]);
   }
 
   // Shift Down
-  for (int i = 0; i + 1 < 9; i++) {
+  for (int i = index; i + 1 < 9; i++) {
     swap(array[i], array[i + 1]);
   }
 

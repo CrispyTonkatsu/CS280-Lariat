@@ -8,7 +8,7 @@
   #include "lariat.h"
 #endif
 
-// NOTE: Current Test = 9
+// NOTE: Current Test = 14
 
 // TODO: Document the code.
 // TODO: Throw Exceptions for the required things.
@@ -167,6 +167,11 @@ void Lariat<T, Size>::push_back(const T &value) {
 
 template<typename T, int Size>
 void Lariat<T, Size>::erase(int index) {
+  if (size_ == 0) {
+    // TODO: Check that this is the right Error Code
+    throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
+  }
+
   if (index < 0 || index >= size_) {
     throw LariatException(LariatException::E_BAD_INDEX, "Subscript is out of range");
   }
@@ -190,8 +195,6 @@ void Lariat<T, Size>::erase(int index) {
   search.node->count--;
   size_--;
 
-  // HACK: Left off here, implementing deletion of empty node
-
   if (search.node->count == 0) {
     search.node->prev->next = search.node->next;
     search.node->next->prev = search.node->prev;
@@ -203,7 +206,11 @@ void Lariat<T, Size>::erase(int index) {
 
 template<typename T, int Size>
 void Lariat<T, Size>::pop_front() {
-  // TODO: Throw exception for empty Lariat
+  if (size_ == 0) {
+    // TODO: Check that this is the right Error Code
+    throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
+  }
+
   shift_down(head_, 0);
   head_->count--;
   size_--;
@@ -218,7 +225,11 @@ void Lariat<T, Size>::pop_front() {
 
 template<typename T, int Size>
 void Lariat<T, Size>::pop_back() {
-  // TODO: Throw exception for empty Lariat
+  if (size_ == 0) {
+    // TODO: Check that this is the right Error Code
+    throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
+  }
+
   tail_->count--;
   size_--;
 
@@ -327,7 +338,16 @@ void Lariat<T, Size>::clear() {
 }
 
 template<typename T, int Size>
-void Lariat<T, Size>::compact() {}
+void Lariat<T, Size>::compact() {
+  // HACK: Left off here, implementing compact
+  for (LNode *current = head_; current != nullptr; current = current->next) {
+    while (current->count != Size) {
+
+
+      current->count++;
+    }
+  }
+}
 
 // Helper Functions
 
@@ -370,7 +390,7 @@ typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index)
   int traversed_indexes = 0;
   for (LNode *current = head_; current != nullptr; current = current->next) {
 
-    if (traversed_indexes + current->count >= index) {
+    if (traversed_indexes + current->count > index) {
       return ElementSearch{current, index - traversed_indexes};
     }
 

@@ -23,7 +23,7 @@ gcc0:
 	@echo "should run in less than 300 ms"
 	./$(PRG) $@ >studentout$@
 	@echo "lines after the next are mismatches with master output -- see out$@"
-	diff out$@ studentout$@ $(DIFF_OPTIONS)
+	diff ./out/out$@ studentout$@ $(DIFF_OPTIONS)
 mem0 mem1 mem2 mem3 mem4 mem5 mem6 mem7 mem8 mem9 mem10 mem11 mem12 mem13 mem14 mem15 mem16 mem17 mem18 mem19 mem20 mem21 mem22 mem23 mem24 mem25 mem26:
 	@echo "should run in less than 3000 ms"
 	valgrind $(VALGRIND_OPTIONS) ./$(PRG) $(subst mem,,$@) 1>/dev/null 2>difference$@

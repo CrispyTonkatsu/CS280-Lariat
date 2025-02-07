@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTOR
 
 # Compile Options
 add_compile_options(-Wall -Werror -Wextra -std=c++17 -pedantic -Wconversion -O2 -Wno-unused-result)
+add_compile_options(-fdiagnostics-color=always)
 
 # files to compile
 add_executable(driver_c ./src/driver.cpp)

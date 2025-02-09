@@ -217,9 +217,18 @@ void Lariat<T, Size>::pop_front() {
 
   if (head_->count == 0) {
     LNode *new_head = head_->next;
+
     delete head_;
     nodecount_--;
+
+    if (tail_ == head_) {
+      tail_ = new_head;
+    }
     head_ = new_head;
+
+    if (head_ != nullptr) {
+      head_->prev = nullptr;
+    }
   }
 }
 
@@ -233,11 +242,21 @@ void Lariat<T, Size>::pop_back() {
   tail_->count--;
   size_--;
 
+  // TODO: Check if pop-back should also delete nodes which are no longer needed.
   if (tail_->count == 0) {
     LNode *new_tail = tail_->prev;
+
     delete tail_;
     nodecount_--;
+
+    if (tail_ == head_) {
+      head_ = new_tail;
+    }
     tail_ = new_tail;
+
+    if (tail_ != nullptr) {
+      tail_->next = nullptr;
+    }
   }
 }
 
@@ -339,10 +358,9 @@ void Lariat<T, Size>::clear() {
 
 template<typename T, int Size>
 void Lariat<T, Size>::compact() {
-  // HACK: Left off here, implementing compact
   for (LNode *current = head_; current != nullptr; current = current->next) {
     while (current->count != Size) {
-
+      // HACK: Left off here, implementing collecting all values into the current node until its full
 
       current->count++;
     }

@@ -30,7 +30,7 @@ template<typename T, int Size>
 Lariat<T, Size>::Lariat() : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0), asize_(0) {}
 
 template<typename T, int Size>
-Lariat<T, Size>::Lariat(const Lariat<T, Size> &other) : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0) {
+Lariat<T, Size>::Lariat(const Lariat &other) : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0) {
   clear();
 
   for (int i = 0; i < other.size_; i++) {
@@ -104,15 +104,20 @@ void Lariat<T, Size>::insert(int index, const T &value) {
 
   if (node->count < Size) {
     node->values[search.index] = value;
-    node->count++;
+    ++node->count;
 
   } else {
     T overflow = node->values[search.index];
     node->values[search.index] = value;
 
+
     LNode *new_half = split(*node);
+    if(node == tail_){
+      tail_ = new_half;
+    }
+
     new_half->values[new_half->count] = overflow;
-    new_half->count++;
+    ++new_half->count;
   }
 
   size_++;
@@ -123,7 +128,7 @@ void Lariat<T, Size>::push_front(const T &value) {
   if (head_ == nullptr) {
     head_ = create_node();
     head_->values[0] = value;
-    head_->count++;
+    ++head_->count;
 
     tail_ = head_;
     nodecount_++;
@@ -226,7 +231,7 @@ void Lariat<T, Size>::pop_front() {
   }
 
   shift_down(head_, 0);
-  head_->count--;
+  --head_->count;
   size_--;
 
   if (head_->count == 0) {
@@ -253,7 +258,7 @@ void Lariat<T, Size>::pop_back() {
     throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
   }
 
-  tail_->count--;
+  --tail_->count;
   size_--;
 
   // TODO: Check what would be the faster way to do this
@@ -383,11 +388,11 @@ void Lariat<T, Size>::compact() {
         while (current->count != Size) {
 
           current->values[current->count] = inner->values[0];
-          current->count++;
+          ++current->count;
 
           shift_down(inner, 0);
 
-          inner->count--;
+          --inner->count;
           if (inner->count == 0) {
             break;
           }
@@ -397,7 +402,7 @@ void Lariat<T, Size>::compact() {
   }
 
   LNode *current = tail_;
-  while (current != head_) {
+  while (current != nullptr && current->count == 0) {
     LNode *to_delete = current;
 
     tail_ = current->prev;
@@ -425,7 +430,7 @@ typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {
 
   for (int i = 0; i < split_point - 1 - extra_whole; i++) {
     second_half->values[i] = to_split.values[split_point + i];
-    second_half->count++;
+    ++second_half->count;
   }
   to_split.count = split_point;
 
@@ -462,7 +467,7 @@ typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index)
 
 // NOTE: The index provided will hold the overflow value if there is one
 template<typename T, int Size>
-void Lariat<T, Size>::shift_up(Lariat<T, Size>::LNode *node, int index) {
+void Lariat<T, Size>::shift_up(LNode *node, int index) {
   if (node == nullptr) {
     return;
   }
@@ -473,7 +478,7 @@ void Lariat<T, Size>::shift_up(Lariat<T, Size>::LNode *node, int index) {
 }
 
 template<typename T, int Size>
-void Lariat<T, Size>::shift_down(Lariat<T, Size>::LNode *node, int index) {
+void Lariat<T, Size>::shift_down(LNode *node, const int index) {
   if (node == nullptr) {
     return;
   }

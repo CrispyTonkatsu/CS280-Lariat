@@ -8,10 +8,6 @@
   #include "lariat.h"
 #endif
 
-// NOTE: Remaining Tests = Probably related issues so first deal with the memory leak.
-// - 24 (The operations are not consistent)
-// - 26 (There is 1 node being lost made from a call to split)
-
 // TODO: Document the code.
 // TODO: Throw Exceptions for the required things.
 

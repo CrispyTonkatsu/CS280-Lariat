@@ -7,6 +7,7 @@
 #include <functional> // std::bind std::placeholders
 #include <iomanip>
 #include <iostream>
+#include <ostream>
 #include "lariat.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -803,49 +804,49 @@ void run_scenario_cmp_to_vector // for correctess
     Action a = std::get<0>(op);
     switch (a) {
       case Insert:
-        // std::cout << "Insert at " << pos << " value " << val << std::endl;
+        /*std::cout << "Insert at " << pos << " value " << val << std::endl;*/
         lar.insert(pos, val);
         v.insert(v.begin() + pos, val);
         break;
       case Erase:
-        // std::cout << "Erase at " << pos << std::endl;
+        /*std::cout << "Erase at " << pos << std::endl;*/
         lar.erase(pos);
         v.erase(v.begin() + pos);
         break;
       case Pushback:
-        // std::cout << "Pushback " << " value " << val << std::endl;
+        /*std::cout << "Pushback " << " value " << val << std::endl;*/
         lar.push_back(val);
         v.push_back(val);
         break;
       case Pushfront:
-        // std::cout << "Pushfront " << " value " << val << std::endl;
+        /*std::cout << "Pushfront " << " value " << val << std::endl;*/
         lar.push_front(val);
         v.insert(v.begin(), val);
         break;
       case Popfront:
-        // std::cout << "Popfront " << std::endl;
+        /*std::cout << "Popfront " << std::endl;*/
         lar.pop_front();
         v.erase(v.begin());
         break;
       case Popback:
-        // std::cout << "Popback " << std::endl;
+        /*std::cout << "Popback " << std::endl;*/
         lar.pop_back();
         v.pop_back();
         break;
       case Compact:
-        // std::cout << "Compact " << std::endl;
+        /*std::cout << "Compact " << std::endl;*/
         lar.compact();
         //                v.swap( std::vector<int>( v ) ); // swap needs a reference, temporary arg can only have const&
         std::vector<int>(v).swap(v);
         break;
       case Index:
-        // std::cout << "Index " << std::endl;
+        /*std::cout << "Index " << std::endl;*/
         if (lar[pos] != v[pos]) {
           std::cout << "Index failed at pos " << pos << std::endl;
         }
         break;
       case Find:
-        // std::cout << "Find " << std::endl;
+        /*std::cout << "Find " << std::endl;*/
         int find_pos = lar.find(val);
         std::vector<int>::iterator find_it = std::find(v.begin(), v.end(), val);
         if ((find_pos == -1 && find_it == v.end()) || (find_pos == static_cast<int>(find_it - v.begin()))) {
@@ -859,11 +860,12 @@ void run_scenario_cmp_to_vector // for correctess
     if (lar.size() == v.size()) {
       for (unsigned i = 0; i < lar.size(); ++i) {
         // print both
-        // std::cout << "Index " << i << "  " << lar[i] << "  " << v[i] << std::endl;
+        /*std::cout << "Index " << i << "  " << lar[i] << "  " << v[i] << std::endl;*/
         if (lar[i] == v[i]) {
         } else {
           std::cout << "values differ: lar[" << i << "] = " << lar[i] << "    v[" << i << "] = " << v[i] << std::endl;
-          std::cout << lar << std::endl;
+          std::cout << "Operation was " << a << std::endl;
+          /*std::cout << lar << std::endl;*/
         }
       }
     } else {

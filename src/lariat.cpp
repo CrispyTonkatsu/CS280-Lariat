@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <iostream>
+#include <ostream>
 #include <utility>
 
 #define LARIAT_CPP
@@ -8,7 +8,9 @@
   #include "lariat.h"
 #endif
 
-// NOTE: Current Test = 14
+// NOTE: Remaining Tests = Probably related issues so first deal with the memory leak.
+// - 24 (The operations are not consistent)
+// - 26 (There is 1 node being lost made from a call to split)
 
 // TODO: Document the code.
 // TODO: Throw Exceptions for the required things.
@@ -28,33 +30,45 @@ template<typename T, int Size>
 Lariat<T, Size>::Lariat() : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0), asize_(0) {}
 
 template<typename T, int Size>
-Lariat<T, Size>::Lariat(const Lariat<T, Size> &) {
-  // TODO: Utilize push_back() to copy all the the elements into the copy correctly
-  head_ = nullptr;
-  size_ = 0;
-}
-
-template<typename T, int Size>
-template<typename OtherT, int OtherSize>
-Lariat<T, Size>::Lariat(const Lariat<OtherT, OtherSize> &) {
-  // TODO: Utilize push_back() to copy all the the elements into the copy correctly (templated)
-  head_ = nullptr;
-  size_ = 0;
-}
-
-template<typename T, int Size>
-Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat &) {
+Lariat<T, Size>::Lariat(const Lariat<T, Size> &other) : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0) {
   clear();
-  // TODO: Cleanup data, then do the same functionality as the copy constructor
-  return *this;
-};
+
+  for (int i = 0; i < other.size_; i++) {
+    push_back(other[i]);
+  }
+}
 
 template<typename T, int Size>
 template<typename OtherT, int OtherSize>
-Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat<OtherT, OtherSize> &) {
-  // TODO: Cleanup data, then do the same functionality as the copy constructor (templated)
+Lariat<T, Size>::Lariat(const Lariat<OtherT, OtherSize> &other) :
+    head_(nullptr), tail_(nullptr), size_(0), nodecount_(0) {
+  clear();
+
+  for (int i = 0; i < other.size_; i++) {
+    push_back(static_cast<T>(other[i]));
+  }
+}
+
+template<typename T, int Size>
+Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat &other) {
+  clear();
+
+  for (int i = 0; i < other.size_; i++) {
+    push_back(other[i]);
+  }
   return *this;
-};
+}
+
+template<typename T, int Size>
+template<typename OtherT, int OtherSize>
+Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat<OtherT, OtherSize> &other) {
+  clear();
+
+  for (int i = 0; i < other.size_; i++) {
+    push_back(static_cast<T>(other[i]));
+  }
+  return *this;
+}
 
 template<typename T, int Size>
 Lariat<T, Size>::~Lariat() {
@@ -242,7 +256,7 @@ void Lariat<T, Size>::pop_back() {
   tail_->count--;
   size_--;
 
-  // TODO: Check if pop-back should also delete nodes which are no longer needed.
+  // TODO: Check what would be the faster way to do this
   if (tail_->count == 0) {
     LNode *new_tail = tail_->prev;
 
@@ -349,21 +363,49 @@ void Lariat<T, Size>::clear() {
   while (current != nullptr) {
     LNode *to_delete = current;
 
+    size_ -= current->count;
     current = current->next;
     delete to_delete;
 
     nodecount_--;
   }
+
+  head_ = nullptr;
+  tail_ = nullptr;
 }
 
 template<typename T, int Size>
 void Lariat<T, Size>::compact() {
   for (LNode *current = head_; current != nullptr; current = current->next) {
-    while (current->count != Size) {
-      // HACK: Left off here, implementing collecting all values into the current node until its full
+    for (LNode *inner = current->next; inner != nullptr; inner = inner->next) {
+      if (inner->count > 0) {
 
-      current->count++;
+        while (current->count != Size) {
+
+          current->values[current->count] = inner->values[0];
+          current->count++;
+
+          shift_down(inner, 0);
+
+          inner->count--;
+          if (inner->count == 0) {
+            break;
+          }
+        }
+      }
     }
+  }
+
+  LNode *current = tail_;
+  while (current != head_) {
+    LNode *to_delete = current;
+
+    tail_ = current->prev;
+    current = current->prev;
+    delete to_delete;
+
+    tail_->next = nullptr;
+    nodecount_--;
   }
 }
 
@@ -418,7 +460,7 @@ typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index)
   return {nullptr, 0};
 }
 
-// HACK: The index provided will hold the overflow value if there is one
+// NOTE: The index provided will hold the overflow value if there is one
 template<typename T, int Size>
 void Lariat<T, Size>::shift_up(Lariat<T, Size>::LNode *node, int index) {
   if (node == nullptr) {

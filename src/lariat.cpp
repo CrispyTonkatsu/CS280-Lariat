@@ -8,11 +8,14 @@
   #include "lariat.h"
 #endif
 
-// TODO: Document the code.
-// TODO: Throw Exceptions for the required things.
-
 // Utility Implementation
 
+/**
+ * @brief A replacement of the std::swap function
+ *
+ * @param a The value to swap with b
+ * @param b The value to swap with a
+ */
 template<typename T>
 void swap(T &a, T &b) {
   T temp = std::move(a);
@@ -22,9 +25,15 @@ void swap(T &a, T &b) {
 
 // Constructors + Destructor
 
+/**
+ * @brief Constructs an empty Lariat
+ */
 template<typename T, int Size>
 Lariat<T, Size>::Lariat() : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0), asize_(0) {}
 
+/**
+ * @brief Copy contructor for Lariat
+ */
 template<typename T, int Size>
 Lariat<T, Size>::Lariat(const Lariat &other) : head_(nullptr), tail_(nullptr), size_(0), nodecount_(0) {
   clear();
@@ -34,6 +43,9 @@ Lariat<T, Size>::Lariat(const Lariat &other) : head_(nullptr), tail_(nullptr), s
   }
 }
 
+/**
+ * @brief Templatized copy contructor for Lariat
+ */
 template<typename T, int Size>
 template<typename OtherT, int OtherSize>
 Lariat<T, Size>::Lariat(const Lariat<OtherT, OtherSize> &other) :
@@ -45,6 +57,9 @@ Lariat<T, Size>::Lariat(const Lariat<OtherT, OtherSize> &other) :
   }
 }
 
+/**
+ * @brief Copy assignment operator for Lariat
+ */
 template<typename T, int Size>
 Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat &other) {
   clear();
@@ -55,6 +70,9 @@ Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat &other) {
   return *this;
 }
 
+/**
+ * @brief Templatized copy assignment operator for Lariat
+ */
 template<typename T, int Size>
 template<typename OtherT, int OtherSize>
 Lariat<T, Size> &Lariat<T, Size>::operator=(const Lariat<OtherT, OtherSize> &other) {
@@ -73,6 +91,12 @@ Lariat<T, Size>::~Lariat() {
 
 // Insertion Methods
 
+/**
+ * @brief Insert a value of type T into the Lariat
+ *
+ * @param index Location to insert
+ * @param value Value to insert
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::insert(int index, const T &value) {
   if (index < 0 || index > size_) {
@@ -90,9 +114,6 @@ void Lariat<T, Size>::insert(int index, const T &value) {
   }
 
   ElementSearch search = find_element(index);
-  if (search.node == nullptr) {
-    // TODO: Throw an exception or something
-  }
 
   LNode *node = search.node;
 
@@ -106,9 +127,8 @@ void Lariat<T, Size>::insert(int index, const T &value) {
     T overflow = node->values[search.index];
     node->values[search.index] = value;
 
-
     LNode *new_half = split(*node);
-    if(node == tail_){
+    if (node == tail_) {
       tail_ = new_half;
     }
 
@@ -119,6 +139,11 @@ void Lariat<T, Size>::insert(int index, const T &value) {
   size_++;
 }
 
+/**
+ * @brief Insert a value of T at the front of the Lariat
+ *
+ * @param value Value to insert
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::push_front(const T &value) {
   if (head_ == nullptr) {
@@ -155,6 +180,11 @@ void Lariat<T, Size>::push_front(const T &value) {
   size_++;
 }
 
+/**
+ * @brief Insert a value of T at the end of the Lariat
+ *
+ * @param value Value to insert
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::push_back(const T &value) {
   if (tail_ == nullptr) {
@@ -180,10 +210,14 @@ void Lariat<T, Size>::push_back(const T &value) {
 
 // Deletion Methods
 
+/**
+ * @brief Erase the value at index
+ *
+ * @param index Index of value to delete
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::erase(int index) {
   if (size_ == 0) {
-    // TODO: Check that this is the right Error Code
     throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
   }
 
@@ -202,9 +236,6 @@ void Lariat<T, Size>::erase(int index) {
   }
 
   ElementSearch search = find_element(index);
-  if (search.node == nullptr) {
-    // TODO: Throw an exception or sth
-  }
 
   shift_down(search.node, search.index);
   search.node->count--;
@@ -219,10 +250,12 @@ void Lariat<T, Size>::erase(int index) {
   }
 }
 
+/**
+ * @brief Erase the first element in the Lariat
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::pop_front() {
   if (size_ == 0) {
-    // TODO: Check that this is the right Error Code
     throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
   }
 
@@ -247,17 +280,18 @@ void Lariat<T, Size>::pop_front() {
   }
 }
 
+/**
+ * @brief Erase the last element in the Lariat
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::pop_back() {
   if (size_ == 0) {
-    // TODO: Check that this is the right Error Code
     throw LariatException(LariatException::E_DATA_ERROR, "Cannot delete in an empty Lariat");
   }
 
   --tail_->count;
   size_--;
 
-  // TODO: Check what would be the faster way to do this
   if (tail_->count == 0) {
     LNode *new_tail = tail_->prev;
 
@@ -277,62 +311,94 @@ void Lariat<T, Size>::pop_back() {
 
 // Access Methods
 
+/**
+ * @brief Retrieves the element at index
+ *
+ * @param index The index of the element to retrieve
+ * @return Reference to retrieved value
+ */
 template<typename T, int Size>
 T &Lariat<T, Size>::operator[](int index) {
   ElementSearch search = find_element(index);
-  if (search.node == nullptr) {
-    // TODO: Throw exception or sth
-  }
 
   return search.node->values[search.index];
 }
 
+/**
+ * @brief Retrieves the element at index with a const reference
+ *
+ * @param index The index of the element to retrieve
+ * @return Const reference to retrieved value
+ */
 template<typename T, int Size>
 const T &Lariat<T, Size>::operator[](int index) const {
   ElementSearch search = find_element(index);
-  if (search.node == nullptr) {
-    // TODO: Throw exception or sth
-  }
 
   return search.node->values[search.index];
 }
 
+/**
+ * @brief Retrieves the element at the front of the Lariat
+ *
+ * @return Reference to retrieved value
+ */
 template<typename T, int Size>
 T &Lariat<T, Size>::first() {
   if (head_ == nullptr) {
-    // TODO: Throw exception or sth
+    throw LariatException(LariatException::E_BAD_INDEX, "Empty lariat, cannot access first element");
   }
 
   return head_->values[0];
 }
 
+/**
+ * @brief Retrieves the element at the front of the Lariat
+ *
+ * @return Const reference to retrieved value
+ */
 template<typename T, int Size>
 T const &Lariat<T, Size>::first() const {
   if (head_ == nullptr) {
-    // TODO: Throw exception or sth
+    throw LariatException(LariatException::E_BAD_INDEX, "Empty lariat, cannot access first element");
   }
 
   return head_->values[0];
 }
 
+/**
+ * @brief Retrieves the element at the end of the Lariat
+ *
+ * @return Reference to retrieved value
+ */
 template<typename T, int Size>
 T &Lariat<T, Size>::last() {
   if (tail_ == nullptr) {
-    // TODO: Throw exception or sth
+    throw LariatException(LariatException::E_BAD_INDEX, "Empty lariat, cannot access last element");
   }
 
   return tail_->values[tail_->count - 1];
 }
 
+/**
+ * @brief Retrieves the element at the end of the Lariat
+ *
+ * @return Const reference to retrieved value
+ */
 template<typename T, int Size>
 T const &Lariat<T, Size>::last() const {
   if (tail_ == nullptr) {
-    // TODO: Throw exception or sth
+    throw LariatException(LariatException::E_BAD_INDEX, "Empty lariat, cannot access last element");
   }
 
   return tail_->values[tail_->count - 1];
 }
 
+/**
+ * @brief Retrieve the element where value T is
+ *
+ * @param value The value to find
+ * @return index of the element
+ */
 template<typename T, int Size>
 unsigned Lariat<T, Size>::find(const T &value) const {
 
@@ -353,11 +419,19 @@ unsigned Lariat<T, Size>::find(const T &value) const {
 
 // Miscelaneous Methods
 
+/**
+ * @brief Retrieve the element where value T is
+ *
+ * @return The amount of elements contained in the data structure
+ */
 template<typename T, int Size>
 size_t Lariat<T, Size>::size() const {
   return size_;
 }
 
+/**
+ * @brief Clear the Lariat
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::clear() {
   LNode *current = head_;
@@ -375,6 +449,9 @@ void Lariat<T, Size>::clear() {
   tail_ = nullptr;
 }
 
+/**
+ * @brief Removes all empty spaces in the data structure
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::compact() {
   for (LNode *current = head_; current != nullptr; current = current->next) {
@@ -412,6 +489,12 @@ void Lariat<T, Size>::compact() {
 
 // Helper Functions
 
+/**
+ * @brief Splits the current node so that each node has an even amount of elements after inserting a new one.
+ *
+ * @param to_split The node to split
+ * @return Pointer to the second half of the split
+ */
 template<typename T, int Size>
 typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {
   LNode *second_half = create_node();
@@ -442,6 +525,12 @@ typename Lariat<T, Size>::LNode *Lariat<T, Size>::split(LNode &to_split) {
   return second_half;
 }
 
+/**
+ * @brief Finds the element at the given index
+ *
+ * @param index The index to look in
+ * @return A struct containing the results of the search.
+ */
 template<typename T, int Size>
 typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index) const {
   if (index < 0 || index >= size_) {
@@ -461,7 +550,12 @@ typename Lariat<T, Size>::ElementSearch Lariat<T, Size>::find_element(int index)
   return {nullptr, 0};
 }
 
-// NOTE: The index provided will hold the overflow value if there is one
+/**
+ * @brief Shifts all elements in the node up by 1 index.
+ *
+ * @param node The node to shift up in.
+ * @param index The index to shift up from.
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::shift_up(LNode *node, int index) {
   if (node == nullptr) {
@@ -473,6 +567,12 @@ void Lariat<T, Size>::shift_up(LNode *node, int index) {
   }
 }
 
+/**
+ * @brief Shifts all elements in the node down by 1 index.
+ *
+ * @param node The node to shift down in.
+ * @param index The index to shift down from.
+ */
 template<typename T, int Size>
 void Lariat<T, Size>::shift_down(LNode *node, const int index) {
   if (node == nullptr) {
@@ -484,6 +584,9 @@ void Lariat<T, Size>::shift_down(LNode *node, const int index) {
   }
 }
 
+/**
+ * @brief Factory method for a node. This will throw an exception if it fails.
+ */
 template<typename T, int Size>
 typename Lariat<T, Size>::LNode *Lariat<T, Size>::create_node() const {
   LNode *output = nullptr;
